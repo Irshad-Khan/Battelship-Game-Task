@@ -42,4 +42,9 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function gemeHistories()
+    {
+        return $this->hasMany(GameHistory::class, 'user_id','id');
+    }
 }

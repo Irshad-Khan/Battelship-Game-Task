@@ -11,7 +11,7 @@
                     <div class="alert alert-success" style="display: none" role="alert" id="message"></div>
 
                     <div class="row">
-                        <div class="col-md-8" id="your_board">
+                        <div class="col-md-7" id="your_board">
                             <h3>Your Base</h3>
                             <hr>
                             <?php
@@ -47,8 +47,26 @@
                                     placeholder="Enter coordinates (row, col), e.g. A5">
                             </div>
                         </div>
-                        <div class="col-md-4" id="enemy_board">
-
+                        <div class="col-md-5" id="enemy_board">
+                            <h4>User Game History</h4>
+                            <table class="table">
+                                <thead>
+                                  <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Total Shot</th>
+                                    <th scope="col">Date Played</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (Auth::user()->gemeHistories as $history)
+                                        <tr>
+                                            <th scope="row">{{ $loop->iteration }}</th>
+                                            <td>{{ $history->total_shots }}</td>
+                                            <td>{{ Carbon\Carbon::parse($history->created_at)->format('F d, Y') }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                              </table>
                         </div>
                     </div>
                 </div>
@@ -90,6 +108,9 @@
                         }else{
                             $('#message').css('display','block');
                             $('#message').text(response.message+' Total Shot:'+response.totalShot);
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1000);
                         }
                     }
                 });

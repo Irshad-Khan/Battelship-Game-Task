@@ -2,70 +2,43 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Ship;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Contracts\GuessInterface;
+use App\Services\GameHistoryFacades;
+use App\Services\ShipServiceFacade;
+use App\Services\UserFacades;
 
 class GuessController extends Controller
 {
+    protected $guessInterface;
+    public function __construct(GuessInterface $guessInterface)
+    {
+        $this->guessInterface = $guessInterface;
+    }
+
+    /**
+     * Return to Board of the game
+     */
     public function index()
     {
-        Ship::truncate();
-        Auth::user()->update(
-            [
-                'total_shots' => 0
-            ]
-        );
-        $xAxis = ['1','2','3','4','5','6','7','8','9','10'];
-        $yAxis = ['A','B','C','D','E','F','G','H','I','J'];
-
-        $coordinateY = $yAxis[array_rand($yAxis)];
-
-        for($i=1; $i< count($xAxis)/2; $i++){
-            // $coordinate .= $coordinateY.$xAxis[$i-1].',';
-            Ship::create([
-                'ship_type' => 'Battleship',
-                'coordinates' => $coordinateY.$xAxis[$i-1]
-            ]);
-        }
-
-
-
-        $coordinatex = $xAxis[array_rand($xAxis)];
-        for($i=((count($yAxis)/2)); $i<10; $i++){
-            // $coordinateE .= $yAxis[$i-1].$coordinatex.',';
-            Ship::create([
-                'ship_type' => 'Destroyers',
-                'coordinates' => $yAxis[$i-1].$coordinatex
-            ]);
-        }
-
-
+        $this->guessInterface->index();
         return view('battelship_board.index');
     }
 
+    /**
+     * It is used to update usr shots, also update status and guess user input
+     */
     public function guess($xy)
     {
-        $xy = ucfirst($xy);
-
-        $ship = Ship::where('is_gussed',false)->count();
-        Auth::user()->update(
-            [
-                'total_shots' => Auth::user()->total_shots+1
-            ]
-        );
-        if($ship > 0){
-            $ship = Ship::where('coordinates',$xy)->first();
-            if($ship){
-                $ship->is_gussed = true;
-                $ship->save();
+        UserFacades::updateShots();
+        if(ShipServiceFacade::getCoordinateNotGuessed() > 0){
+            if($ship = ShipServiceFacade::getShipByCoordinate($xy = ucfirst($xy))){
+               ShipServiceFacade::updateShipCoordinateStatus($ship);
                 return response()->json([
                     'status' => 'hit',
                     'message' => "*** Hit ***",
                     'data' => $xy
                 ],200);
             }
-
             return response()->json([
                 'status' => 'miss',
                 'message' => "*** Miss ***",
@@ -73,11 +46,12 @@ class GuessController extends Controller
             ],200);
         }
 
+        GameHistoryFacades::store();
         return response()->json([
             'status' => 'sunk',
             'message' => "*** Sunk ***",
             'data' => $xy,
-            'totalShot' => Auth::user()->total_shots
+            'totalShot' => UserFacades::getTotalShot(),
         ],200);
 
     }
