@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Ship;
+use Illuminate\Support\Facades\Auth;
 
 class ShipService
 {
@@ -12,7 +13,7 @@ class ShipService
      */
     public function getCoordinateNotGuessed()
     {
-        return Ship::where('is_gussed',false)->count();
+        return Ship::where('is_gussed',false)->where('user_id',Auth::id())->count();
     }
 
     /**
@@ -22,7 +23,7 @@ class ShipService
      */
     public function getShipByCoordinate($coordinate)
     {
-        return Ship::where('coordinates',$coordinate)->first();
+        return Ship::where('coordinates',$coordinate)->where('user_id',Auth::id())->first();
     }
 
     /**
@@ -41,7 +42,7 @@ class ShipService
      */
     public function truncateShip()
     {
-        Ship::truncate();
+        Ship::where('user_id', Auth::id())->delete();
     }
 
     /**
@@ -49,7 +50,7 @@ class ShipService
      */
     public function checkDuplicateRecord()
     {
-        $ships = Ship::all();
+        $ships = Ship::where('user_id',Auth::id())->get();
         return $ships->diff($ships->unique('coordinates'))->count();
     }
 }

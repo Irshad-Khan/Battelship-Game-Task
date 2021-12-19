@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateShipsTable extends Migration
+class AddUserIdColumnToShipsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,8 @@ class CreateShipsTable extends Migration
      */
     public function up()
     {
-        Schema::create('ships', function (Blueprint $table) {
-            $table->id();
-            $table->string('ship_type',20);
-            $table->string('coordinates');
-            $table->tinyInteger('is_gussed')->default(0);
-
-            $table->timestamps();
+        Schema::table('ships', function (Blueprint $table) {
+            $table->unsignedInteger('user_id')->after('is_gussed');
         });
     }
 
@@ -30,6 +25,8 @@ class CreateShipsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ships');
+        Schema::table('ships', function (Blueprint $table) {
+            $table->dropColumn(['user_id']);
+        });
     }
 }

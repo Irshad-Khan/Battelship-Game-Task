@@ -29,7 +29,8 @@ class GuessRepository implements GuessInterface
         for($i=1; $i< count($this->xAxis)/2; $i++){
             Ship::create([
                 'ship_type' => 'Battleship',
-                'coordinates' => $coordinateY.$this->xAxis[$i-1]
+                'coordinates' => $coordinateY.$this->xAxis[$i-1],
+                'user_id' => Auth::id()
             ]);
         }
 
@@ -40,7 +41,8 @@ class GuessRepository implements GuessInterface
         for($i=((count($this->yAxis)/2)); $i<10; $i++){
             Ship::create([
                 'ship_type' => 'Destroyers',
-                'coordinates' => $this->yAxis[$i-1].$coordinatex
+                'coordinates' => $this->yAxis[$i-1].$coordinatex,
+                'user_id' => Auth::id()
             ]);
         }
 
